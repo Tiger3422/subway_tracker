@@ -11,23 +11,12 @@ payload = {'filter[route]': 'Orange'}
 def get_stops_by_route(route):
     payload = {'filter[route]' : route}
     r = requests.get(f'{base_url}/stops', params=payload)
-    stops = r.json()
-    #print(json.dumps(stops, indent=2))  # Pretty print
-    return stops
+    data = r.json()
+    print(json.dumps(data, indent=2))  # Pretty print
+    return data
     
     
-#get_stops_by_route("Orange")
-
-def stop_attributes(stops, query):
-    #initilize stop id list
-    stop_ids=[]
-    #iterate through dictionary and add all stop ids to a list
-    for stop in stops['data']:
-        stop_ids.append(stop[query])
-    print(stop_ids)
-    return stop_ids
-    
-stop_id_list(get_stops_by_route("Orange", 'id'))
+get_stops_by_route("Orange")
     
 
 def get_stop_info(stop_id):
