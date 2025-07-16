@@ -11,12 +11,23 @@ payload = {'filter[route]': 'Orange'}
 def get_stops_by_route(route):
     payload = {'filter[route]' : route}
     r = requests.get(f'{base_url}/stops', params=payload)
-    data = r.json()
-    print(json.dumps(data, indent=2))  # Pretty print
-    return data
+    stops = r.json()
+    #print(json.dumps(stops, indent=2))  # Pretty print
+    return stops
     
     
-get_stops_by_route("Orange")
+#get_stops_by_route("Orange")
+
+def stop_attributes(stops, query):
+    #initilize stop id list
+    stop_ids=[]
+    #iterate through dictionary and add all stop ids to a list
+    for stop in stops['data']:
+        stop_ids.append(stop[query])
+    
+    return stop_ids
+    
+stop_attributes(get_stops_by_route("Orange", 'id'))
     
 
 def get_stop_info(stop_id):
@@ -27,8 +38,18 @@ def get_stop_info(stop_id):
     else: 
         print(f"Failed to retrieve data: {r.status_code}")
 
+
+def get_stop_predictions(stop_id):
+    payload = {'filter[stop]' : stop_id}
+    r = requests.get(f'{base_url}/predictions', params=payload)
+    
+    if r.status_code == 200:
+        return r.json() 
+    else: 
+        print(f"Failed to retrieve data: {r.status_code}")
 stop_id= "70025"
 stop_info=get_stop_info(stop_id)
 
 #if stop_info:
 #    print(f"Name: {stop_info['data']['attributes']['name']}")
+
