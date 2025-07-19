@@ -52,34 +52,39 @@ def get_stop_predictions(stop_id, route, direction):
         print(f"Failed to retrieve data: {r.status_code}")
 
 stop_id= "place-haecl"
-stop_info=get_stop_predictions(stop_id, "Orange", 1)
+# stop_info=get_stop_predictions(stop_id, "Orange", 1)
 
-if 'data' in stop_info:
-    #run through all train predictions
-    for i in range(len(stop_info['data'])):
-        #get stop info for the index prediction
-        prediction = stop_info['data'][i]
-        #convert the arrival time to python time
-        time_str = prediction['attributes']['arrival_time']
-        dt = datetime.fromisoformat(time_str)
-        unix_timestamp = int(dt.timestamp())
-        print(f" Train {prediction['relationships']['vehicle']['data']['id']} will arrive at {dt}" )
+# if 'data' in stop_info:
+#     #run through all train predictions
+#     for i in range(len(stop_info['data'])):
+#         #get stop info for the index prediction
+#         prediction = stop_info['data'][i]
+#         #convert the arrival time to python time
+#         time_str = prediction['attributes']['arrival_time']
+#         dt = datetime.fromisoformat(time_str)
+#         unix_timestamp = int(dt.timestamp())
+#         print(f" Train {prediction['relationships']['vehicle']['data']['id']} will arrive at {dt}" )
 
 
 def turn_on_led(led_number):
     print(f"light at {station} is on")
 
 
-def light_logic(c_stop, vech_list):
+def light_logic(c_stop, vech_list, route, direction):
+    #get dict from api for predictions for certain stop route and direction
+    stop_info=get_stop_predictions(c_stop, route, direction)
     prediction = stop_info['data'][i]
     train_id = prediction['relationships']['vechile']['data']['id']
     
-    #
-    if train_id in vech_list:
+    #check if the current train id is in vech list
+    if not train_id in vech_list:
         #get arrive time and convert it to unix
         dt = datetime.fromisoformat(prediction['attributes']['arrival_time'])
         arrive_time = int(dt.timestamp())
         if(arrive_time-current_time<60):
+            turn_on_led(1)
+    else:
+        return train_id
     
     
     
