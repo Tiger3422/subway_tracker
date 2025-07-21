@@ -18,8 +18,10 @@ def get_stops_by_route(route):
     #print(json.dumps(stops, indent=2))  # Pretty print
     return stops
     
-    
-#get_stops_by_route("Orange")
+def dump(info):
+    with open("output.json", "w", encoding="utf-8") as f:
+        json.dump(info, f, indent=2)    
+
 
 def stop_attributes(stops, query):
     #initilize stop id list
@@ -30,7 +32,7 @@ def stop_attributes(stops, query):
     
     return stop_ids
     
-stop_attributes(get_stops_by_route("Orange"),"id")
+#stop_attributes(get_stops_by_route("Orange"),"id")
     
 
 def get_stop_info(stop_id):
@@ -52,13 +54,14 @@ def get_stop_predictions(stop_id, route, direction):
         print(f"Failed to retrieve data: {r.status_code}")
 
 stop_id= "place-haecl"
-# stop_info=get_stop_predictions(stop_id, "Orange", 1)
+stop_info=get_stop_info(stop_id)
+stop_info2=get_stop_predictions(stop_id, "Orange", 1)
 
-# if 'data' in stop_info:
+# if 'data' in stop_info2:
 #     #run through all train predictions
-#     for i in range(len(stop_info['data'])):
+#     for i in range(len(stop_info2['data'])):
 #         #get stop info for the index prediction
-#         prediction = stop_info['data'][i]
+#         prediction = stop_info2['data'][i]
 #         #convert the arrival time to python time
 #         time_str = prediction['attributes']['arrival_time']
 #         dt = datetime.fromisoformat(time_str)
@@ -66,33 +69,45 @@ stop_id= "place-haecl"
 #         print(f" Train {prediction['relationships']['vehicle']['data']['id']} will arrive at {dt}" )
 
 
-def turn_on_led(led_number):
-    print(f"light at {station} is on")
+def turn_on_led(c_stop, led_number ):
+    print(f"light at {led_number} is on")
 
 
-def light_logic(c_stop, vech_list, route, direction):
+def light_logic(stop_info, vec_list, route, direction):
+    #define c_stop route and route from stop_info
+    c_stop=stop_info['data']['id']
+    
     #get dict from api for predictions for certain stop route and direction
-    stop_info=get_stop_predictions(c_stop, route, direction)
-    prediction = stop_info['data'][i]
-    train_id = prediction['relationships']['vechile']['data']['id']
-    
-    #check if the current train id is in vech list
-    if not train_id in vech_list:
-        #get arrive time and convert it to unix
-        dt = datetime.fromisoformat(prediction['attributes']['arrival_time'])
-        arrive_time = int(dt.timestamp())
-        if(arrive_time-current_time<60):
-            turn_on_led(1)
-    else:
-        return train_id
+    stop_prediction=get_stop_predictions(c_stop, route, direction)
     
     
     
-    
+    #run through all train predictions
+    for i in range(len(stop_prediction['data'])):
+        prediction = stop_prediction['data'][i]
+        train_id = prediction['relationships']['vehicle']['data']['id']
+        
+        #check if the current train id is in vech list
+        if train_id in vec_list:
+            print(f"The train {train_id} is accounted for")
+            return train_id
+        if train_id not in vec_list:
+            #get arrive time and convert it to unix
+            dt = datetime.fromisoformat(prediction['attributes']['arrival_time'])
+            arrive_time = int(dt.timestamp())
+            #append current train_id to vech_list
+            vec_list.append(train_id)
+            #check where train is in comparison with station
+            if(arrive_time-current_time<60):
+                turn_on_led(c_stop, 1)
+            elif(arrive_time - current_time < 180):
+                turn_on_led(c_stop, 2)
+            else:
+                turn_on_led(c_stop, 3)
+
+vec_list=[]
+light_logic(stop_info, vec_list, "Orange", 1)
 
 
-
-# with open("output.json", "w", encoding="utf-8") as f:
-#     json.dump(stop_info, f, indent=2)
 
 
